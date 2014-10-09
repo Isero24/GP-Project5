@@ -16,8 +16,11 @@ namespace Project5
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        public Camera camera { get; protected set; }
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        ModelManager modelManager;
 
         public Game1()
         {
@@ -34,6 +37,14 @@ namespace Project5
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            camera = new Camera(this, new Vector3(0, 0, 50),
+                Vector3.Zero, Vector3.Up);
+
+            modelManager = new ModelManager(this);
+
+            Components.Add(modelManager);
+            Components.Add(camera);
 
             base.Initialize();
         }
