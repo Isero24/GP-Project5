@@ -20,7 +20,12 @@ namespace Project5
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        ModelManager modelManager;
+        public ModelManager modelManager;
+
+        public Vector3 getTargetPos()
+        {
+            return modelManager.center;
+        }
 
         public Game1()
         {
@@ -38,7 +43,7 @@ namespace Project5
         {
             // TODO: Add your initialization logic here
 
-            camera = new Camera(this, new Vector3(0, 0, 50),
+            camera = new Camera(this, new Vector3(0, 0, 500),
                 Vector3.Zero, Vector3.Up);
 
             modelManager = new ModelManager(this);

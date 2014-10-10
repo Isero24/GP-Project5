@@ -20,7 +20,7 @@ namespace Project5
 
         public virtual void Update()
         {
-
+            
         }
 
         public void Draw(Camera camera)
@@ -47,5 +47,22 @@ namespace Project5
             return world;
         }
 
+        public virtual Model returnModel()
+        {
+            return model;
+        }
+
+        public BoundingSphere modelBoundSphere()
+        {
+            // Create a total bounding sphere for the mesh
+            BoundingSphere totalbounds = new BoundingSphere();
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                totalbounds = BoundingSphere.CreateMerged(totalbounds,
+                    mesh.BoundingSphere);
+            }
+
+            return totalbounds;
+        }
     }
 }

@@ -17,8 +17,17 @@ namespace Project5
     /// </summary>
     public class ModelManager : Microsoft.Xna.Framework.DrawableGameComponent
     {
-        List<BasicModel> models = new List<BasicModel>();
+        public Vector2 targetPos;
+        public Vector3 center;
+        public Matrix world;
 
+        List<BasicModel> models = new List<BasicModel>();
+        Texture2D targetTexture;
+        SpriteBatch spriteBatch;
+        KeyboardState oldKeyState;
+        float maxdistance;
+        bool toggle;
+        
         public ModelManager(Game game)
             : base(game)
         {
@@ -33,6 +42,9 @@ namespace Project5
         {
             // TODO: Add your initialization code here
 
+            oldKeyState = Keyboard.GetState();
+            toggle = false;
+
             base.Initialize();
         }
 
@@ -44,8 +56,14 @@ namespace Project5
         {
             // TODO: use this.Content to load your game content here
 
+            // Create a new SpriteBatch, which can be used to draw textures.
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Load the target sprite texture
+            targetTexture = Game.Content.Load<Texture2D>("Image1");
+
             models.Add(new BasicModel(
-                Game.Content.Load<Model>("Models/spaceship")));
+                Game.Content.Load<Model>("Models/space_frigate_6/space_frigate_6")));
 
             base.LoadContent();
         }
@@ -56,12 +74,35 @@ namespace Project5
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
-            // TODO: Add your update code here
+            // TODO: Add your update code here            
 
             // Loop through all models and call Update
             for (int i = 0; i < models.Count; ++i)
             {
                 models[i].Update();
+
+                BoundingSphere totalbounds = models[i].modelBoundSphere();
+                center = modelCenterPos(totalbounds);
+                targetPos.X = center.X;
+                targetPos.Y = center.Y;
+                world = models[i].GetWorld();
+
+                BoundingBox extents = BoundingBox.CreateFromSphere(totalbounds);
+                maxdistance = 0;
+                float distance;
+                Vector3 screencorner;
+                foreach (Vector3 corner in extents.GetCorners())
+                {
+                    screencorner = GraphicsDevice.Viewport.Project(corner,
+                        ((Game1)Game).camera.projection, 
+                        ((Game1)Game).camera.view, Matrix.Identity);
+                        distance = Vector3.Distance(screencorner, center);
+
+                    if (distance > maxdistance)
+                        maxdistance = distance;
+                }
+
+                
             }
 
             base.Update(gameTime);
@@ -81,7 +122,32 @@ namespace Project5
                 bm.Draw(((Game1)Game).camera);
             }
 
+            if (Keyboard.GetState().IsKeyDown(Keys.T) && oldKeyState.IsKeyUp(Keys.T))
+            {
+                toggle = !toggle;
+            }
+
+            if (toggle == true)
+            {
+                spriteBatch.Begin();
+                spriteBatch.Draw(targetTexture,
+                    targetPos,
+                    new Rectangle(0, 0, (int)maxdistance, (int)maxdistance),
+                    Color.White, 0, Vector2.Zero,
+                    1f, SpriteEffects.None, 0);
+                spriteBatch.End();
+            }
+            oldKeyState = Keyboard.GetState();
+
             base.Draw(gameTime);
+        }
+
+        public Vector3 modelCenterPos(BoundingSphere totalbounds)
+        {
+
+            return GraphicsDevice.Viewport.Project(totalbounds.Center,
+                ((Game1)Game).camera.projection,
+                ((Game1)Game).camera.view, Matrix.Identity);
         }
     }
 }
