@@ -43,7 +43,7 @@ namespace Project5
         {
             // TODO: Add your initialization logic here
 
-            camera = new Camera(this, new Vector3(0, 0, 500),
+            camera = new Camera(this, new Vector3(0, 0, 50),
                 Vector3.Zero, Vector3.Up);
 
             modelManager = new ModelManager(this);

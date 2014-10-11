@@ -16,9 +16,11 @@ namespace Project5
         // Camera matrices
         public Matrix view { get; protected set; }
         public Matrix projection { get; protected set; }
+        public Matrix world;
 
         // Camera vectors
         public Vector3 cameraPosition { get; protected set; }
+        Vector3 cameraTarget;
         Vector3 cameraDirection;
         Vector3 cameraUp;
 
@@ -27,11 +29,14 @@ namespace Project5
         KeyboardState oldKeyState;
         MouseState prevMouseState;
 
+        private float angle = 0f;
+
         public Camera(Game game, Vector3 pos, Vector3 target, Vector3 up)
             : base(game)
         {
             // Build camera view matrix
             cameraPosition = pos;
+            cameraTarget = target;
             cameraDirection = target - pos;
             cameraDirection.Normalize();
             cameraUp = up;
@@ -63,26 +68,29 @@ namespace Project5
         {
             // TODO: Add your update code here
 
+
             if (Keyboard.GetState().IsKeyDown(Keys.T) && oldKeyState.IsKeyUp(Keys.T))
             {
-                if (toggle == false)
+                toggle = !toggle;
+
+                if (toggle == true)
                 {
-                    Vector3 modelPos2 = ((Game1)Game).modelManager.world.Translation;
+                    cameraTarget = ((Game1)Game).modelManager.world.Translation;
 
-                    cameraPosition = Vector3.Transform(cameraPosition - modelPos2, Matrix.CreateFromAxisAngle(cameraUp, 0)) + modelPos2;
+                    //cameraPosition = Vector3.Transform(cameraPosition - modelPos2, Matrix.CreateFromAxisAngle(cameraUp, 3 * angle)) + modelPos2;
 
-                    view = Matrix.CreateLookAt(cameraPosition, modelPos2, cameraUp);
+                    //view = Matrix.CreateLookAt(cameraPosition, modelPos2, cameraUp);
                 }
                 else
                 {
-                    //cameraDirection = Vector3.Zero - cameraPosition;
+                    cameraDirection = cameraTarget - cameraPosition;
                 }
-
-                toggle = !toggle;
             }
 
+            
+
             // Move forward/backward
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            /*if (Keyboard.GetState().IsKeyDown(Keys.W))
                 cameraPosition += cameraDirection * speed;
             if (Keyboard.GetState().IsKeyDown(Keys.S))
                 cameraPosition -= cameraDirection * speed;
@@ -91,7 +99,7 @@ namespace Project5
             if (Keyboard.GetState().IsKeyDown(Keys.A))
                 //cameraPosition += Vector3.Cross(cameraUp, cameraDirection) * speed;
             if (Keyboard.GetState().IsKeyDown(Keys.D))
-                cameraPosition -= Vector3.Cross(cameraUp, cameraDirection) * speed;
+                cameraPosition -= Vector3.Cross(cameraUp, cameraDirection) * speed;*/
 
             /*// Roll rotation
             if (Mouse.GetState().LeftButton == ButtonState.Pressed)
@@ -116,13 +124,31 @@ namespace Project5
 
                 //Vector2 modelPos = ((Game1)Game).getTargetPos();
 
-                if (Keyboard.GetState().IsKeyDown(Keys.A))
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                if (toggle == true)
+                {
+                    cameraPosition = Vector3.Transform(cameraPosition - cameraTarget, Matrix.CreateFromAxisAngle(Vector3.Up, .05f)) + cameraTarget;
+                }
+                else
+                {
                     cameraDirection = Vector3.Transform(cameraDirection,
                         Matrix.CreateFromAxisAngle(cameraUp, (-MathHelper.PiOver4 / 45)));
+                }
+            }
 
-                if (Keyboard.GetState().IsKeyDown(Keys.D))
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                if (toggle == true)
+                {
+                    cameraPosition = Vector3.Transform(cameraPosition - cameraTarget, Matrix.CreateFromAxisAngle(Vector3.Up, -.05f)) + cameraTarget;
+                }
+                else
+                {
                     cameraDirection = Vector3.Transform(cameraDirection,
                         Matrix.CreateFromAxisAngle(cameraUp, (MathHelper.PiOver4 / 45)));
+                }
+            }
                 
 
                 /*// Pitch rotation
@@ -137,11 +163,23 @@ namespace Project5
                     (Mouse.GetState().Y - prevMouseState.Y)));*/
             //}
 
+            // Reset previous keyboard state 
+            oldKeyState = Keyboard.GetState();
             // Reset prevMouseState
             prevMouseState = Mouse.GetState();
 
             // Recreate the camera view matrix
             CreateLookAt();
+
+            if (toggle == true)
+            {
+                view = Matrix.CreateLookAt(cameraPosition,
+                    cameraTarget, cameraUp);
+            }
+            else
+            {
+                CreateLookAt();
+            }
 
             base.Update(gameTime);
         }

@@ -60,10 +60,10 @@ namespace Project5
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // Load the target sprite texture
-            targetTexture = Game.Content.Load<Texture2D>("Image1");
+            targetTexture = Game.Content.Load<Texture2D>("Crosshairs");
 
             models.Add(new BasicModel(
-                Game.Content.Load<Model>("Models/space_frigate_6/space_frigate_6")));
+                Game.Content.Load<Model>("Models/spaceship")));
 
             base.LoadContent();
         }
@@ -85,7 +85,8 @@ namespace Project5
                 center = modelCenterPos(totalbounds);
                 targetPos.X = center.X;
                 targetPos.Y = center.Y;
-                world = models[i].GetWorld();
+                ((Game1)Game).camera.world = models[i].GetWorld();
+
 
                 BoundingBox extents = BoundingBox.CreateFromSphere(totalbounds);
                 maxdistance = 0;
@@ -130,11 +131,18 @@ namespace Project5
             if (toggle == true)
             {
                 spriteBatch.Begin();
-                spriteBatch.Draw(targetTexture,
+                targetPos.X -= maxdistance/8;
+                targetPos.Y -= maxdistance/5;
+                spriteBatch.Draw(
+                    targetTexture,
                     targetPos,
-                    new Rectangle(0, 0, (int)maxdistance, (int)maxdistance),
-                    Color.White, 0, Vector2.Zero,
-                    1f, SpriteEffects.None, 0);
+                    new Rectangle(0, 0, 256, 256),
+                    Color.White, 
+                    0, 
+                    Vector2.Zero,
+                    .5f, 
+                    SpriteEffects.None, 
+                    0);
                 spriteBatch.End();
             }
             oldKeyState = Keyboard.GetState();
